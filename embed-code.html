@@ -1,0 +1,60 @@
+<!--
+  株式会社カンマン チャットボット埋め込みコード
+
+  使用方法:
+  1. このコードを </body> タグの直前にコピーして貼り付けてください
+  2. data-api-url を本番環境のAPIのURLに変更してください
+
+  例: https://comman.co.jp/ のページに追加する場合
+-->
+
+<!-- チャットボットウィジェット -->
+<script
+  src="https://your-cdn-url.com/chatbot-widget.js"
+  data-comman-chatbot
+  data-api-url="https://api.comman.co.jp"
+  async
+></script>
+
+<!--
+  注意事項:
+  - src属性のURLは、ビルドしたchatbot-widget.jsファイルをホスティングしたCDNのURLに変更してください
+  - data-api-urlは、デプロイしたバックエンドAPIのURLを指定してください
+  - asyncを指定することで、ページの読み込みを妨げずにチャットボットを読み込めます
+-->
+
+<!-- 手動初期化の場合（data-comman-chatbot属性なし） -->
+<!--
+<script src="https://your-cdn-url.com/chatbot-widget.js"></script>
+<script>
+  // ページ読み込み完了後に初期化
+  window.addEventListener('load', function() {
+    window.initCommanChatbot({
+      apiUrl: 'https://api.comman.co.jp'
+    });
+  });
+</script>
+-->
+
+<!-- WordPress用の埋め込み例 -->
+<!--
+  WordPressの場合:
+  1. 外観 > テーマエディター から footer.php を編集
+  2. </body> タグの直前に上記のコードを追加
+
+  または
+
+  テーマの functions.php に以下を追加:
+
+  function add_comman_chatbot() {
+    ?>
+    <script
+      src="https://your-cdn-url.com/chatbot-widget.js"
+      data-comman-chatbot
+      data-api-url="https://api.comman.co.jp"
+      async
+    ></script>
+    <?php
+  }
+  add_action('wp_footer', 'add_comman_chatbot');
+-->
