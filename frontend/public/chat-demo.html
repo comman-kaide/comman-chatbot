@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カンマンチャットボット - デモ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 60px 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #667eea;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #6b7280;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .content {
+      line-height: 1.8;
+      color: #374151;
+      margin-bottom: 40px;
+    }
+
+    .content h2 {
+      color: #667eea;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .content ul {
+      margin-left: 20px;
+      margin-bottom: 20px;
+    }
+
+    .content li {
+      margin-bottom: 10px;
+    }
+
+    .cta {
+      background: #f7f8fa;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .cta h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .cta p {
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .info-box strong {
+      color: #667eea;
+    }
+
+    /* チャットボットスタイル */
+    #chat-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+
+    .chat-button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 24px;
+    }
+
+    .chat-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+    }
+
+    .chat-window {
+      display: none;
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 380px;
+      height: 600px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      flex-direction: column;
+      animation: slideUp 0.3s ease;
+    }
+
+    .chat-window.active {
+      display: flex;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .chat-header h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .chat-close {
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 24px;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+
+    .chat-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #f7f8fa;
+    }
+
+    .message {
+      margin-bottom: 16px;
+      display: flex;
+    }
+
+    .message-bot {
+      justify-content: flex-start;
+    }
+
+    .message-content {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      line-height: 1.5;
+    }
+
+    .chat-input-area {
+      padding: 16px;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input {
+      flex: 1;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .chat-input:focus {
+      border-color: #667eea;
+    }
+
+    .chat-send {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-message {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      color: #856404;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>株式会社カンマン</h1>
+    <p class="subtitle">生成AIとブランディングで企業の競争力を高める</p>
+
+    <div class="content">
+      <h2>私たちについて</h2>
+      <p>
+        株式会社カンマンは、徳島県を拠点に、地方の中小企業向けに生成AIとブランディングのサービスを提供しています。
+        「学ぶ」から「創る」までをワンストップで提供し、企業の競争力向上をサポートします。
+      </p>
+
+      <h2>主要サービス</h2>
+      <ul>
+        <li><strong>生成AI研修</strong> - 生成AIの基本知識と実務的な活用方法を教育</li>
+        <li><strong>ホームページ制作</strong> - 目標設定から成果に繋がるサイト制作</li>
+        <li><strong>システム開発</strong> - 業務効率化やデジタル化推進のためのシステム・アプリ開発</li>
+        <li><strong>ブランディング研修</strong> - 企業の独自性と目指す姿を導き出す支援</li>
+        <li><strong>その他</strong> - 集客コンサルティング、Web・SNS広告運用、動画制作、保守サービス</li>
+      </ul>
+
+      <div class="info-box">
+        <strong>実績:</strong> 徳島県内で500プロジェクト以上のホームページ制作実績
+      </div>
+
+      <h2>会社情報</h2>
+      <ul>
+        <li><strong>所在地:</strong> 徳島県</li>
+        <li><strong>電話:</strong> 088-611-2333</li>
+        <li><strong>営業時間:</strong> 平日 9:30～18:00</li>
+      </ul>
+
+      <div class="cta">
+        <h3>お問い合わせはこちら</h3>
+        <p>サービスに関するご質問やご相談は、右下のチャットボットからお気軽にお問い合わせください!</p>
+
+        <div class="status-message">
+          ⚠️ デモモード: バックエンドAPIに接続されていないため、実際の応答は表示されません。
+          完全な機能を利用するには、バックエンドAPIをデプロイしてください。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- チャットボット -->
+  <div id="chat-widget">
+    <button class="chat-button" onclick="toggleChat()">💬</button>
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <div>
+          <h3>カンマンチャット</h3>
+          <small>オンライン</small>
+        </div>
+        <button class="chat-close" onclick="toggleChat()">×</button>
+      </div>
+      <div class="chat-messages" id="messages">
+        <div class="message message-bot">
+          <div class="message-content">
+            こんにちは! 株式会社カンマンのチャットボットです。生成AI研修、ホームページ制作、システム開発などについて、お気軽にご質問ください。
+            <br><br>
+            <small style="color: #9ca3af;">※ デモモード: 実際の応答機能を使用するには、バックエンドAPIのデプロイが必要です。</small>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input
+          type="text"
+          class="chat-input"
+          id="chatInput"
+          placeholder="メッセージを入力..."
+          onkeypress="handleKeyPress(event)"
+        />
+        <button class="chat-send" onclick="sendMessage()" id="sendButton">
+          ➤
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleChat() {
+      const chatWindow = document.getElementById('chatWindow');
+      chatWindow.classList.toggle('active');
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      // ユーザーメッセージを表示
+      addMessage(message, 'user');
+      input.value = '';
+
+      // デモ応答
+      setTimeout(() => {
+        addMessage(
+          '申し訳ございません。現在デモモードのため、実際の応答機能は利用できません。\n\n' +
+          'バックエンドAPIをデプロイすると、Claude AIによる自動応答が可能になります。\n\n' +
+          'お急ぎの場合は、お電話（088-611-2333）またはメールでお問い合わせください。',
+          'bot'
+        );
+      }, 1000);
+    }
+
+    function addMessage(text, sender) {
+      const messagesDiv = document.getElementById('messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message message-${sender}`;
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      contentDiv.textContent = text;
+      contentDiv.style.whiteSpace = 'pre-wrap';
+
+      if (sender === 'user') {
+        messageDiv.style.justifyContent = 'flex-end';
+        contentDiv.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        contentDiv.style.color = 'white';
+      }
+
+      messageDiv.appendChild(contentDiv);
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+  </script>
+</body>
+</html>
